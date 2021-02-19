@@ -2,15 +2,16 @@
 project_name: terraform-provider-spinnaker
 builds:
   - main: ./main.go
+    binary: terraform-provider-spinnaker
     ldflags:
-    - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+    - -s -w
     env:
       - CGO_ENABLED=0
     goos:
       - linux
       - darwin
     goarch:
-      - 386
+      - '386'
       - amd64
     binary: '{{ .ProjectName }}_v{{ .Version }}'
 archives:
