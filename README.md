@@ -12,18 +12,18 @@ Manage [Spinnaker](https://spinnaker.io) applications and pipelines with Terrafo
 
 ```
 provider "spinnaker" {
-    server = "http://spinnaker-gate.myorg.io"
+  server = "http://spinnaker-gate.myorg.io"
 }
 
 resource "spinnaker_application" "my_app" {
-    application = "terraformtest"
-    email = "ethan@armory.io"
+  application = "terraformtest"
+  email       = "ethan@armory.io"
 }
 
 resource "spinnaker_pipeline" "terraform_example" {
-    application = "${spinnaker_application.my_app.application}"
-    name = "Example Pipeline"
-    pipeline = file("pipelines/example.json")
+  application = spinnaker_application.my_app.application
+  name        = "Example Pipeline"
+  pipeline    = file("pipelines/example.json")
 }
 ```
 
@@ -49,10 +49,10 @@ See [Terraform documentation](https://www.terraform.io/docs/configuration/provid
 
 ```
 provider "spinnaker" {
-    server             = "http://spinnaker-gate.myorg.io"
-    config             = "/path/to/config.yml"
-    ignore_cert_errors = true
-    default_headers    = "Api-Key=abc123"
+  server             = "http://spinnaker-gate.myorg.io"
+  config             = "/path/to/config.yml"
+  ignore_cert_errors = true
+  default_headers    = "Api-Key=abc123"
 }
 ```
 
@@ -71,8 +71,8 @@ provider "spinnaker" {
 
 ```
 resource "spinnaker_application" "my_app" {
-    application = "terraformtest"
-    email = "ethan@armory.io"
+  application = "terraformtest"
+  email       = "ethan@armory.io"
 }
 ```
 #### Argument Reference
@@ -85,9 +85,9 @@ resource "spinnaker_application" "my_app" {
 
 ```
 resource "spinnaker_pipeline" "terraform_example" {
-    application = "${spinnaker_application.my_app.application}"
-    name = "Example Pipeline"
-    pipeline = file("pipelines/example.json")
+  application = spinnaker_application.my_app.application
+  name        = "Example Pipeline"
+  pipeline    = file("pipelines/example.json")
 }
 ```
 
@@ -102,12 +102,10 @@ resource "spinnaker_pipeline" "terraform_example" {
 #### Example Usage
 
 ```
-data "template_file" "dcd_template" {
-    template = "${file("template.yml")}"
-}
-
 resource "spinnaker_pipeline_template" "terraform_example" {
-    template = "${data.template_file.dcd_template.rendered}"
+  template = templatefile("template.yml", {
+    yourVariable = var.your-variable
+    })
 }
 ```
 
@@ -120,12 +118,10 @@ resource "spinnaker_pipeline_template" "terraform_example" {
 #### Example Usage
 
 ```
-data "template_file" "dcd_template_config" {
-    template = "${file("config.yml")}"
-}
-
 resource "spinnaker_pipeline_template_config" "terraform_example" {
-    pipeline_config = "${data.template_file.dcd_template_config.rendered}"
+  pipeline_config = templatefile("config.yml",{
+    yourVariable = var.your-variable
+  })
 }
 ```
 
