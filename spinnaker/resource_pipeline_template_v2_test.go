@@ -3,7 +3,7 @@ package spinnaker
 import (
 	"testing"
 
-	"github.com/Bonial-International-GmbH/terraform-provider-spinnaker/spinnaker/api"
+	"github.com/aegaxs/terraform-provider-spinnaker/spinnaker/api"
 	"github.com/stretchr/testify/require"
 )
 

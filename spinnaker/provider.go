@@ -56,6 +56,8 @@ type clientConfig struct {
 	defaultHeaders   string
 	configLocation   string
 	ignoreCertErrors bool
+	ignoreRedirects  bool
+	retryTimeout     int
 
 	once   sync.Once
 	client *gate.GatewayClient
@@ -73,6 +75,8 @@ func (c *clientConfig) Client() (*gate.GatewayClient, error) {
 			c.defaultHeaders,
 			c.configLocation,
 			c.ignoreCertErrors,
+			c.ignoreRedirects,
+			c.retryTimeout,
 		)
 	})
 

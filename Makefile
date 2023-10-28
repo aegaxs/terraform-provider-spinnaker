@@ -5,7 +5,7 @@ TEST_FLAGS      ?= -race
 PKGS            ?= $(shell go list ./... | grep -v /vendor/)
 VERSION         ?= 99.99.99
 LOCAL_PROVIDERS ="$$HOME/.terraform.d/plugins_local"
-BINARY_PATH     = "registry.terraform.io/Bonial-International-GmbH/spinnaker/${VERSION}/$$(go env GOOS)_$$(go env GOARCH)/${BINARY}_${VERSION}"
+BINARY_PATH     = "registry.terraform.io/aegaxs/spinnaker/${VERSION}/$$(go env GOOS)_$$(go env GOARCH)/${BINARY}_${VERSION}"
 
 .PHONY: help
 help:
@@ -25,17 +25,17 @@ build: ## build terraform-provider-spinnaker
 # provider_installation {
 #   filesystem_mirror {
 #     path    = "<your-home-directory>/.terraform.d/plugins_local/"
-#     include = ["registry.terraform.io/Bonial-International-GmbH/spinnaker"]
+#     include = ["registry.terraform.io/aegaxs/spinnaker"]
 #   }
 #
 #   direct {
-#     exclude = ["registry.terraform.io/Bonial-International-GmbH/spinnaker"]
+#     exclude = ["registry.terraform.io/aegaxs/spinnaker"]
 #   }
 # }
 #
 .PHONY: build_local
 build_local: ## build terraform-provider-spinnaker and install it in a local plugins dir
-	@echo "Please configure your .terraformrc file to contain a filesystem_mirror block pointed at '${LOCAL_PROVIDERS}' for 'registry.terraform.io/Bonial-International-GmbH/spinnaker'"
+	@echo "Please configure your .terraformrc file to contain a filesystem_mirror block pointed at '${LOCAL_PROVIDERS}' for 'registry.terraform.io/aegaxs/spinnaker'"
 	@echo "You MUST use a direct exclusion in this block in order to pick up the built binary. Otherwise it will query the registry and find a distribution version"
 	@echo "You MUST comment out the 'version' constraint in the required_providers block in any Terraform installation you test this in."
 	@echo "You MUST delete existing cached plugins from any .terraform directories in Terraform installations you want to test against so that it will perform a lookup on the local mirror"
