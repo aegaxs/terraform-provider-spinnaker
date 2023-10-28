@@ -8,7 +8,7 @@ metadata:
   annotations:
     backstage.io/techdocs-ref: dir:.
   links:
-    - url: https://registry.terraform.io/providers/Bonial-International-GmbH/spinnaker/latest
+    - url: https://registry.terraform.io/providers/aegaxs/spinnaker/latest
   tags:
     - terraform
     - provider

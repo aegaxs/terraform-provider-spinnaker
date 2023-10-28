@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Bonial-International-GmbH/terraform-provider-spinnaker/spinnaker/api"
-	apierrors "github.com/Bonial-International-GmbH/terraform-provider-spinnaker/spinnaker/api/errors"
+	"github.com/aegaxs/terraform-provider-spinnaker/spinnaker/api"
+	apierrors "github.com/aegaxs/terraform-provider-spinnaker/spinnaker/api/errors"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 

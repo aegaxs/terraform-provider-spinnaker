@@ -6,17 +6,20 @@ import (
 	"strings"
 	"time"
 
+	"github.com/antihax/optional"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/mitchellh/mapstructure"
 	gate "github.com/spinnaker/spin/cmd/gateclient"
+	gateapi "github.com/spinnaker/spin/gateapi"
 )
 
-func GetApplication(client *gate.GatewayClient, applicationName string, dest interface{}) error {
-	app, resp, err := retry(func() (map[string]interface{}, *http.Response, error) {
-		return client.ApplicationControllerApi.GetApplicationUsingGET(client.Context, applicationName, nil)
-	})
 
+func GetApplication(client *gate.GatewayClient, applicationName string, dest interface{}) error {
+	
+	opts := &gateapi.ApplicationControllerApiGetApplicationUsingGETOpts{};
+	opts.Expand = optional.NewBool(false);
+	app, resp, err := client.ApplicationControllerApi.GetApplicationUsingGET(client.Context, applicationName, opts)
 	if resp != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			return fmt.Errorf("Application '%s' not found\n", applicationName)
