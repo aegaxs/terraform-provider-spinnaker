@@ -14,9 +14,7 @@ import (
 	gateapi "github.com/spinnaker/spin/gateapi"
 )
 
-
 func GetApplication(client *gate.GatewayClient, applicationName string, dest interface{}) error {
-	
 	opts := &gateapi.ApplicationControllerApiGetApplicationUsingGETOpts{};
 	opts.Expand = optional.NewBool(false);
 	app, resp, err := client.ApplicationControllerApi.GetApplicationUsingGET(client.Context, applicationName, opts)
