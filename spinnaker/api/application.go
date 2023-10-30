@@ -15,8 +15,8 @@ import (
 )
 
 func GetApplication(client *gate.GatewayClient, applicationName string, dest interface{}) error {
-	opts := &gateapi.ApplicationControllerApiGetApplicationUsingGETOpts{};
-	opts.Expand = optional.NewBool(false);
+	opts := &gateapi.ApplicationControllerApiGetApplicationUsingGETOpts{}
+	opts.Expand = optional.NewBool(false)
 	app, resp, err := client.ApplicationControllerApi.GetApplicationUsingGET(client.Context, applicationName, opts)
 	if resp != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
