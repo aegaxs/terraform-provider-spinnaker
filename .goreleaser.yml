@@ -42,7 +42,7 @@ signs:
       - "${artifact}"
 release:
   github:
-    owner: aegaxs
+    owner: HaroonSaid
     name: terraform-provider-spinnaker
 changelog:
   sort: asc
