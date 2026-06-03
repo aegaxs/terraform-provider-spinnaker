@@ -20,6 +20,7 @@ type PipelineTemplateV2Metadata struct {
 type PipelineTemplateV2Variable struct {
 	Name         string      `json:"name"`
 	Description  *string     `json:"description,omitempty"`
+	Default      interface{} `json:"default,omitempty"`
 	DefaultValue interface{} `json:"defaultValue,omitempty"`
 	Type         string      `json:"type"`
 }

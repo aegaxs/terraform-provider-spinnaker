@@ -1,6 +1,7 @@
 package spinnaker
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/aegaxs/terraform-provider-spinnaker/spinnaker/api"
@@ -41,4 +42,98 @@ func TestParsePipelineTemplateV2(t *testing.T) {
 		require.Error(t, err)
 		require.Regexp(t, `.*field 'id' must not be set.*`, err.Error())
 	})
+
+	t.Run("parses variable default field", func(t *testing.T) {
+		template, err := parsePipelineTemplateV2(`{
+			"schema":"v2",
+			"pipeline":{},
+			"metadata":{"name":"bar","description":"baz","scopes":["global"]},
+			"variables":[{"name":"network_mode","type":"string","default":"bridge"}]
+		}`)
+		require.NoError(t, err)
+		require.Len(t, template.Variables, 1)
+		require.Equal(t, "bridge", template.Variables[0].Default)
+	})
+}
+
+func TestNormalizeTemplateV2JSON(t *testing.T) {
+	t.Run("coalesces default into defaultValue", func(t *testing.T) {
+		raw := `{
+			"schema":"v2",
+			"variables":[{"name":"network_mode","type":"string","default":"bridge"}]
+		}`
+
+		normalized, err := normalizeTemplateV2JSON(raw)
+		require.NoError(t, err)
+
+		var doc map[string]interface{}
+		require.NoError(t, json.Unmarshal([]byte(normalized), &doc))
+
+		vars := doc["variables"].([]interface{})
+		variable := vars[0].(map[string]interface{})
+		require.Equal(t, "bridge", variable["defaultValue"])
+		require.NotContains(t, variable, "default")
+	})
+
+	t.Run("leaves defaultValue-only variables unchanged", func(t *testing.T) {
+		raw := `{
+			"schema":"v2",
+			"variables":[{"name":"autodeploy_tag","type":"string","defaultValue":"develop-latest"}]
+		}`
+
+		normalized, err := normalizeTemplateV2JSON(raw)
+		require.NoError(t, err)
+
+		var doc map[string]interface{}
+		require.NoError(t, json.Unmarshal([]byte(normalized), &doc))
+
+		variable := doc["variables"].([]interface{})[0].(map[string]interface{})
+		require.Equal(t, "develop-latest", variable["defaultValue"])
+		require.NotContains(t, variable, "default")
+	})
+
+	t.Run("strips top-level id", func(t *testing.T) {
+		raw := `{"schema":"v2","id":"backofficeservices","variables":[]}`
+
+		normalized, err := normalizeTemplateV2JSON(raw)
+		require.NoError(t, err)
+
+		var doc map[string]interface{}
+		require.NoError(t, json.Unmarshal([]byte(normalized), &doc))
+		require.NotContains(t, doc, "id")
+	})
+}
+
+func TestPipelineTemplateV2DiffSuppressFunc(t *testing.T) {
+	configTemplate := `{
+		"schema":"v2",
+		"variables":[
+			{"name":"network_mode","type":"string","default":"bridge"}
+		]
+	}`
+
+	stateTemplate := `{
+		"schema":"v2",
+		"variables":[
+			{"name":"network_mode","type":"string","defaultValue":"bridge"}
+		]
+	}`
+
+	require.True(t, pipelineTemplateV2DiffSuppressFunc("template", stateTemplate, configTemplate, nil))
+
+	replicasConfig := `{
+		"schema":"v2",
+		"variables":[
+			{"name":"replicas","type":"int","default":1}
+		]
+	}`
+
+	replicasState := `{
+		"schema":"v2",
+		"variables":[
+			{"name":"replicas","type":"int","defaultValue":1}
+		]
+	}`
+
+	require.True(t, pipelineTemplateV2DiffSuppressFunc("template", replicasState, replicasConfig, nil))
 }

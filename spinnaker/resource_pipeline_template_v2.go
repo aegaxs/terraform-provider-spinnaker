@@ -25,10 +25,7 @@ func resourcePipelineTemplateV2() *schema.Resource {
 					}
 					return
 				},
-				DiffSuppressFunc: func(key, old, new string, d *schema.ResourceData) bool {
-					equal, _ := areEqualJSON(old, new)
-					return equal
-				},
+				DiffSuppressFunc: pipelineTemplateV2DiffSuppressFunc,
 			},
 			"template_id": {
 				Description: "ID of the template.",
@@ -103,9 +100,14 @@ func resourcePipelineTemplateV2Read(data *schema.ResourceData, meta interface{})
 		return err
 	}
 
+	normalizedTemplate, err := normalizeTemplateV2JSON(string(rawTemplate))
+	if err != nil {
+		return err
+	}
+
 	reference := fmt.Sprintf("spinnaker://%s", templateID)
 
-	if err := data.Set("template", string(rawTemplate)); err != nil {
+	if err := data.Set("template", normalizedTemplate); err != nil {
 		return err
 	}
 
@@ -249,4 +251,49 @@ func validatePipelineTemplateV2(template *api.PipelineTemplateV2) error {
 	}
 
 	return errs.ErrorOrNil()
+}
+
+func pipelineTemplateV2DiffSuppressFunc(key, old, new string, d *schema.ResourceData) bool {
+	editedOld, err := normalizeTemplateV2JSON(old)
+	if err != nil {
+		return false
+	}
+
+	editedNew, err := normalizeTemplateV2JSON(new)
+	if err != nil {
+		return false
+	}
+
+	return editedOld == editedNew
+}
+
+func normalizeTemplateV2JSON(raw string) (string, error) {
+	var doc map[string]interface{}
+	if err := json.Unmarshal([]byte(raw), &doc); err != nil {
+		return "", fmt.Errorf("invalid template json: %w", err)
+	}
+
+	delete(doc, "id")
+
+	if vars, ok := doc["variables"].([]interface{}); ok {
+		for _, item := range vars {
+			v, ok := item.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			if dv, hasDefault := v["default"]; hasDefault {
+				if _, hasDefaultValue := v["defaultValue"]; !hasDefaultValue {
+					v["defaultValue"] = dv
+				}
+				delete(v, "default")
+			}
+		}
+	}
+
+	encoded, err := json.Marshal(doc)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal template: %w", err)
+	}
+
+	return string(encoded), nil
 }
