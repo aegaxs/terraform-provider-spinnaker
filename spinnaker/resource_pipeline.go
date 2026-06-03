@@ -241,6 +241,14 @@ func decodeEditAndEncodePipeline(rawPipeline string) (string, error) {
 	return editAndEncodePipeline(pipeline)
 }
 
+func stripSpinnakerManagedObjectIDs(items []interface{}) {
+	for _, item := range items {
+		if obj, ok := item.(map[string]interface{}); ok {
+			delete(obj, "id")
+		}
+	}
+}
+
 func editAndEncodePipeline(pipeline map[string]interface{}) (string, error) {
 	// Remove the keys we know are problematic because they are managed
 	// by spinnaker or are handled by other schema attributes.
@@ -251,6 +259,13 @@ func editAndEncodePipeline(pipeline map[string]interface{}) (string, error) {
 	delete(pipeline, "name")
 	delete(pipeline, "schema")
 	delete(pipeline, "updateTs")
+
+	if triggers, ok := pipeline["triggers"].([]interface{}); ok {
+		stripSpinnakerManagedObjectIDs(triggers)
+	}
+	if stages, ok := pipeline["stages"].([]interface{}); ok {
+		stripSpinnakerManagedObjectIDs(stages)
+	}
 
 	encoded, err := json.Marshal(pipeline)
 	if err != nil {
